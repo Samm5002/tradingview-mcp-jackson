@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file ConsolidationRuleParity.test.ts
  *
  * Verifies ConsolidationRule as the Evidence-layer implementation of the ICT consolidation
@@ -267,16 +267,16 @@ describe('ConsolidationRule', () => {
   });
 
   describe('direction', () => {
-    it('compression trigger direction = neutral', () => {
-      assert.equal(ruleResult([EQ_HIGH(), EQ_LOW()], ZERO_CONFIDENCE, makeEmptyContext())!.direction, 'neutral');
+    it('compression trigger direction = indeterminate', () => {
+      assert.equal(ruleResult([EQ_HIGH(), EQ_LOW()], ZERO_CONFIDENCE, makeEmptyContext())!.direction, 'indeterminate');
     });
 
-    it('conflict trigger direction = neutral', () => {
-      assert.equal(ruleResult([], CONFLICTED_CONFIDENCE, makeEmptyContext())!.direction, 'neutral');
+    it('conflict trigger direction = indeterminate', () => {
+      assert.equal(ruleResult([], CONFLICTED_CONFIDENCE, makeEmptyContext())!.direction, 'indeterminate');
     });
 
-    it('direction is always neutral regardless of confidence bias', () => {
-      assert.equal(ruleResult([EQ_HIGH(), EQ_LOW()], BULLISH_CONFIDENCE, makeEmptyContext())!.direction, 'neutral');
+    it('direction is always indeterminate regardless of confidence bias', () => {
+      assert.equal(ruleResult([EQ_HIGH(), EQ_LOW()], BULLISH_CONFIDENCE, makeEmptyContext())!.direction, 'indeterminate');
     });
   });
 
@@ -553,12 +553,12 @@ describe('ConsolidationRule', () => {
       assert.ok(ruleOut.every(h => h.sourceProvider === 'ConsolidationRule'));
     });
 
-    it('existing provider CONSOLIDATION uses indeterminate direction, ConsolidationRule uses neutral', () => {
+    it('both providers use indeterminate direction for CONSOLIDATION', () => {
       const existingOut = EXISTING.generateHypotheses([], CONFLICTED_CONFIDENCE, makeEmptyContext(), BAR_TIME, SERIES_INFO);
       const existingConsolidation = existingOut.filter(h => h.category === HypothesisCategory.CONSOLIDATION);
       const ruleOut = RULE.evaluate([], CONFLICTED_CONFIDENCE, makeEmptyContext(), BAR_TIME, SERIES_INFO);
-      assert.ok(ruleOut.every(h => h.direction === 'neutral'));
-      assert.ok(existingConsolidation.every(h => h.direction === 'indeterminate' || h.direction === 'neutral'));
+      assert.ok(ruleOut.every(h => h.direction === 'indeterminate'));
+      assert.ok(existingConsolidation.every(h => h.direction === 'indeterminate'));
     });
   });
 

@@ -1,5 +1,5 @@
-/**
- * ConsolidationRule — Evidence-layer detection of ICT consolidation/range regime.
+﻿﻿/**
+ * ConsolidationRule â€” Evidence-layer detection of ICT consolidation/range regime.
  *
  * ICT reference: a consolidation regime occurs when price is range-bound between equal highs
  * and equal lows, with balanced directional pressure and no dominant structural break.
@@ -7,22 +7,22 @@
  *
  * Two Evidence-layer triggers (evaluated in priority order):
  *
- *   1. Equal Extrema Compression (primary — direct ICT observation):
+ *   1. Equal Extrema Compression (primary â€” direct ICT observation):
  *      EQUAL_EXTREMA+EQUAL_HIGHS and EQUAL_EXTREMA+EQUAL_LOWS evidence both present on the same bar.
  *      ICT meaning: buy stops accumulating above equal highs AND sell stops below equal lows
- *      simultaneously → price is trapped in a defined consolidation range. This is the only
+ *      simultaneously â†’ price is trapped in a defined consolidation range. This is the only
  *      trigger with a direct structural observation; it does not depend on the confidence engine.
  *
- *   2. Evidence Conflict (secondary — confidence-engine proxy):
+ *   2. Evidence Conflict (secondary â€” confidence-engine proxy):
  *      confidence.conflictScore >= CONFLICT_THRESHOLD (0.6) AND evidenceCount >= MIN_EVIDENCE_COUNT (2).
- *      ICT meaning: balanced bullish and bearish pressure → no dominant directional order flow → ranging.
+ *      ICT meaning: balanced bullish and bearish pressure â†’ no dominant directional order flow â†’ ranging.
  *      conflictScore (0 = one-directional, 1 = maximally conflicted) is the Evidence-layer proxy
  *      for ICT's balanced order flow observation.
  *
- * Both triggers produce direction 'neutral' — consolidation is explicitly non-directional.
+ * Both triggers produce direction 'indeterminate' â€” consolidation is explicitly non-directional.
  * At most one CONSOLIDATION hypothesis is emitted per bar.
  *
- * Architectural gaps — OHLCV and bar-history data unavailable in the Evidence layer:
+ * Architectural gaps â€” OHLCV and bar-history data unavailable in the Evidence layer:
  *   1. ICT consolidation range identification requires bar-history window (ATR, range width
  *      relative to average spread). Evidence carries individual observations, not rolling statistics.
  *      The rule cannot verify that price action is actually "tight" or compressed.
@@ -53,13 +53,13 @@ import type { Hypothesis, ReasoningTraceEntry } from '../../../types/Hypothesis.
 const CONFLICT_THRESHOLD = 0.6;
 
 // Minimum evidenceCount for the conflict trigger to be meaningful.
-// At 2, a single opposing piece produces conflictScore = 0.667 — the practical minimum
+// At 2, a single opposing piece produces conflictScore = 0.667 â€” the practical minimum
 // for a conflict signal to carry any weight.
 const MIN_EVIDENCE_COUNT = 2;
 
 // Flat representative consolidation score.
-// Lower than all directional rules (ICT signals: 65–100) to reflect the non-directional,
-// regime-classification nature of this hypothesis — not a trading signal.
+// Lower than all directional rules (ICT signals: 65â€“100) to reflect the non-directional,
+// regime-classification nature of this hypothesis â€” not a trading signal.
 const ICT_CONSOLIDATION_SCORE = 55;
 
 export class ConsolidationRule implements IProfessionalHypothesisRule {
@@ -72,10 +72,10 @@ export class ConsolidationRule implements IProfessionalHypothesisRule {
     barTime: Date,
     seriesInfo: HypothesisProviderSeriesInfo,
   ): ReadonlyArray<Hypothesis> {
-    // ── Trigger 1: Equal Extrema Compression (priority) ──────────────────────────
-    // Both EQUAL_HIGHS and EQUAL_LOWS present on the same bar → price trapped in a range.
+    // â”€â”€ Trigger 1: Equal Extrema Compression (priority) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Both EQUAL_HIGHS and EQUAL_LOWS present on the same bar â†’ price trapped in a range.
     // Note: EQUAL_EXTREMA evidence is also consumed by LiquiditySweepRule when only one
-    // direction is dominant. Both rules may fire simultaneously — this is expected and correct.
+    // direction is dominant. Both rules may fire simultaneously â€” this is expected and correct.
     const equalHighsEvidence = evidence.filter(
       e => e.type === EvidenceType.EQUAL_EXTREMA && e.tags.includes(EvidenceTag.EQUAL_HIGHS),
     );
@@ -84,8 +84,8 @@ export class ConsolidationRule implements IProfessionalHypothesisRule {
     );
     const hasEqualCompression = equalHighsEvidence.length > 0 && equalLowsEvidence.length > 0;
 
-    // ── Trigger 2: Evidence Conflict (secondary) ──────────────────────────────────
-    // Balanced evidence pressure with sufficient count → no dominant directional flow.
+    // â”€â”€ Trigger 2: Evidence Conflict (secondary) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Balanced evidence pressure with sufficient count â†’ no dominant directional flow.
     const hasConflict =
       confidence.conflictScore >= CONFLICT_THRESHOLD &&
       confidence.evidenceCount >= MIN_EVIDENCE_COUNT;
@@ -104,8 +104,8 @@ export class ConsolidationRule implements IProfessionalHypothesisRule {
       {
         step: 1,
         description: hasEqualCompression
-          ? 'Equal highs and equal lows both present — price compressed in consolidation range (EQUAL_EXTREMA + EQUAL_HIGHS / EQUAL_LOWS)'
-          : `Evidence conflict signal (conflictScore=${confidence.conflictScore.toFixed(2)} >= ${CONFLICT_THRESHOLD}) — balanced directional pressure, no dominant flow`,
+          ? 'Equal highs and equal lows both present â€” price compressed in consolidation range (EQUAL_EXTREMA + EQUAL_HIGHS / EQUAL_LOWS)'
+          : `Evidence conflict signal (conflictScore=${confidence.conflictScore.toFixed(2)} >= ${CONFLICT_THRESHOLD}) â€” balanced directional pressure, no dominant flow`,
         evidenceIds: idsOf(supportingEvidence),
       },
     ];
@@ -114,7 +114,7 @@ export class ConsolidationRule implements IProfessionalHypothesisRule {
       id:       generateHypothesisId(),
       name:     `Consolidation - ${subType}`,
       category: HypothesisCategory.CONSOLIDATION,
-      direction: 'neutral',
+      direction: 'indeterminate',
       confidence: {
         score:              ICT_CONSOLIDATION_SCORE,
         supportStrength:    ICT_CONSOLIDATION_SCORE / 100,
@@ -147,8 +147,8 @@ export class ConsolidationRule implements IProfessionalHypothesisRule {
         equalLowsCount:       equalLowsEvidence.length,
         hasNoStructureBreaks: context.latestBos === null && context.latestChoch === null && context.latestMss === null,
         // Architectural gaps vs ICT (OHLCV and bar-history data unavailable):
-        // - ICT consolidation range requires rolling ATR/range statistics → not computable here
-        // - Equal extrema on different bars miss the compression trigger → single-bar limitation
+        // - ICT consolidation range requires rolling ATR/range statistics â†’ not computable here
+        // - Equal extrema on different bars miss the compression trigger â†’ single-bar limitation
         // - conflictScore with low evidenceCount may reflect thin data, not genuine ranging
         // - ICT consolidation box (priceHigh/priceLow) not derivable from Evidence layer
       },
