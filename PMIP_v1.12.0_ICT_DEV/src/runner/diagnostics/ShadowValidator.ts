@@ -9,7 +9,7 @@
  *
  * Matching semantics:
  *   - Comparison key: `${category}:${direction}`
- *   - Full match: PHP and existing produce identical sets of keys (including both empty)
+ *   - Full match: both providers generated at least one hypothesis and their key sets are identical
  *   - Partial match: at least one key in common (when one or both have hypotheses)
  *   - Agreement: key appears in both sets (counted per bar, not per hypothesis)
  *   - PHP-only: key in PHP set but not existing set
@@ -117,7 +117,6 @@ export class ShadowValidator {
 
     if (eEmpty && pEmpty) {
       state.bothEmptyBars++;
-      state.fullMatchBars++;
       return;
     }
     if (pEmpty) { state.phpEmptyBars++;      return; }
